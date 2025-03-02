@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
+val composeVersion = "1.7.8"
 
 android {
     namespace = "ir.amirreza.composepreferences"
@@ -41,4 +43,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.runtime)
+    implementation(libs.ui)
 }
