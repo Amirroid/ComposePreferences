@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven("https://jitpack.io")
     }
 }
 ```
@@ -23,7 +23,7 @@ dependencyResolutionManagement {
 
 ```gradle
 dependencies {
-    implementation 'com.github.Amirroid:ComposePreferences:last-version'
+    implementation("com.github.Amirroid:ComposePreferences:last-version")
 }
 ```
 
