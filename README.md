@@ -1,4 +1,4 @@
-# 📌 ComposePreferences
+# 📌 ComposePreferences   [![](https://jitpack.io/v/Amirroid/ComposePreferences.svg)](https://jitpack.io/#Amirroid/ComposePreferences)
 
 **ComposePreferences** is a Jetpack Compose library that enables direct state management with SharedPreferences.
 
