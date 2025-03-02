@@ -2,8 +2,14 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    `maven-publish`
 }
 val composeVersion = "1.7.8"
+
+val libraryVersion = "1.0.0"
+
+group = "ir.amirroid"
+version = libraryVersion
 
 android {
     namespace = "ir.amirreza.composepreferences"
@@ -44,4 +50,17 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.runtime)
     implementation(libs.ui)
+}
+
+publishing {
+    publications {
+        create("maven", MavenPublication::class.java) {
+            afterEvaluate {
+                from(components["release"])
+                groupId = "ir.amirroid"
+                artifactId = "ComposePreferences"
+                version = libraryVersion
+            }
+        }
+    }
 }
