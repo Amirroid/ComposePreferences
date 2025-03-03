@@ -1,4 +1,4 @@
-# 📌 ComposePreferences   [![](https://jitpack.io/v/Amirroid/ComposePreferences.svg)](https://jitpack.io/#Amirroid/ComposePreferences)
+# 📌 ComposePreferences    [![](https://jitpack.io/v/Amirroid/ComposePreferences.svg)](https://jitpack.io/#Amirroid/ComposePreferences)
 
 **ComposePreferences** is a Jetpack Compose library that enables direct state management with SharedPreferences.
 
@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenCentral()
-        maven("https://jitpack.io")
+        maven { url 'https://jitpack.io' }
     }
 }
 ```
@@ -23,7 +23,7 @@ dependencyResolutionManagement {
 
 ```gradle
 dependencies {
-    implementation("com.github.Amirroid:ComposePreferences:last-version")
+    implementation 'com.github.Amirroid:ComposePreferences:last-version'
 }
 ```
 
@@ -72,6 +72,69 @@ If `saver` is **not provided**, the following types are supported:
 - Long
 - Set<String>
 - Double
+
+---
+
+## ✨ Creating a Custom Saver
+For complex data types, you can create a custom **PreferenceSaver**. Below is an example of saving and retrieving a `User` object:
+
+```kotlin
+@Immutable
+data class User(
+    val username: String,
+    val password: String
+)
+
+object UserPreferenceSaver : PreferenceSaver<User> {
+    private const val KEY: String = "user"
+
+    override fun save(value: User, sharedPreferences: SharedPreferences) {
+        with(sharedPreferences.edit()) {
+            putString("$KEY-username", value.username)
+            putString("$KEY-password", value.password)
+            apply()
+        }
+    }
+
+    override fun get(sharedPreferences: SharedPreferences): User {
+        val username = sharedPreferences.getString("$KEY-username", "") ?: ""
+        val password = sharedPreferences.getString("$KEY-password", "") ?: ""
+        return User(username, password)
+    }
+}
+```
+
+### **Usage in Compose**
+
+```kotlin
+var user by rememberPreferenceStateOf(
+    "user",
+    User("", ""),
+    saver = UserPreferenceSaver
+)
+
+OutlinedTextField(
+    value = user.username,
+    onValueChange = { user = user.copy(username = it) },
+    label = { Text("Username") },
+    modifier = Modifier.fillMaxWidth()
+)
+
+OutlinedTextField(
+    value = user.password,
+    onValueChange = { user = user.copy(password = it) },
+    label = { Text("Password") },
+    modifier = Modifier.fillMaxWidth()
+)
+```
+
+### **Explanation**
+- `save(value: User, sharedPreferences: SharedPreferences)`: Saves the `User` object by storing its properties separately.
+- `get(sharedPreferences: SharedPreferences)`: Retrieves the `User` object by reading its properties from SharedPreferences.
+- `rememberPreferenceStateOf(...)`: Uses `UserPreferenceSaver` to automatically store and retrieve `User` data in Compose.
+
+This approach allows you to persist and manage complex data types seamlessly within your Jetpack Compose application.
+
 
 ---
 
