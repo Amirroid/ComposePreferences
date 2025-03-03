@@ -41,6 +41,13 @@ fun HomeScreen() {
                     onCheckedChange = { isDarkModeEnabled = it },
                 )
             }
+            var isDarkModeEnabled2 by rememberPreferenceStateOf("dark_mode", true)
+            SettingItem(title = "Dark Mode 2") {
+                Switch(
+                    checked = isDarkModeEnabled2,
+                    onCheckedChange = { isDarkModeEnabled2 = it },
+                )
+            }
 
             // ✅ String preference (Username)
             var username by rememberPreferenceStateOf("username", "")

@@ -2,6 +2,7 @@ package ir.amirreza.composepreferences.state
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +30,17 @@ class PreferenceMutableState<T>(
         set(newValue) {
             _state.value = newValue
             storeValue(newValue)
+        }
+
+    private val preferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (saver == null) {
+                if (changedKey == key) {
+                    _state.value = loadValue()
+                }
+            } else {
+                _state.value = loadValue()
+            }
         }
 
     override fun component1() = value
@@ -67,6 +79,15 @@ class PreferenceMutableState<T>(
     }
 
     private fun Set<*>.filterString() = filterIsInstance<String>().toSet()
+
+
+    fun registerListener() {
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+    }
+
+    fun disposeListener() {
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
+    }
 }
 
 fun <T : Any> preferenceStateOf(
@@ -88,6 +109,15 @@ fun <T : Any> rememberPreferenceStateOf(
     sharedPreferences: SharedPreferences = LocalSharedPreferences.current ?: defaultPreferences(),
     saver: PreferenceSaver<T>? = null,
     vararg keys: Any
-): MutableState<T> = remember(*keys) {
-    preferenceStateOf(key, defaultValue, sharedPreferences, saver)
+): MutableState<T> {
+    return remember(*keys) {
+        preferenceStateOf(key, defaultValue, sharedPreferences, saver)
+    }.also { state ->
+        DisposableEffect(*keys) {
+            state.registerListener()
+            onDispose {
+                state.disposeListener()
+            }
+        }
+    }
 }
