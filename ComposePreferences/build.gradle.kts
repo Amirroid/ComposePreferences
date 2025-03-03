@@ -6,7 +6,7 @@ plugins {
 }
 val composeVersion = "1.7.8"
 
-val libraryVersion = "1.0.0"
+val libraryVersion = "1.0.1"
 
 group = "ir.amirroid"
 version = libraryVersion

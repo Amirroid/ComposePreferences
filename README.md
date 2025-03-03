@@ -43,24 +43,41 @@ SettingItem(title = "Dark Mode") {
 }
 ```
 
-### **Function Signature**
+### **Function Signature and Explanation**
+
+The `rememberPreferenceStateOf` function allows you to store and retrieve values from SharedPreferences while keeping them in sync with your Jetpack Compose UI. You can use this function in two different ways:
+
+#### 1️⃣ Using a Key
+
+This method is useful for primitive types like `String`, `Int`, `Boolean`, etc.
 
 ```kotlin
-rememberPreferenceStateOf(
-    key: String,
-    defaultValue: T,
-    sharedPreferences: SharedPreferences = LocalSharedPreferences.current ?: defaultPreferences(),
-    saver: PreferenceSaver<T>? = null,
-    vararg keys: Any
+var username by rememberPreferenceStateOf(
+    key = "username",
+    defaultValue = "Guest"
 )
 ```
 
-### **Parameter Explanation**
 - `key: String` → The key used to store the value in SharedPreferences.
 - `defaultValue: T` → The default value returned if the key does not exist.
-- `sharedPreferences: SharedPreferences` → The SharedPreferences instance to use (default: a SharedPreferences instance named "screen").
-- `saver: PreferenceSaver<T>?` → Custom saver for complex types (optional).
-- `keys: Any` → Additional keys to trigger recomposition when changed.
+- `sharedPreferences: SharedPreferences` → (Optional) A custom SharedPreferences instance.
+- `keys: Any` → (Optional) Additional keys to trigger recomposition when changed.
+
+#### 2️⃣ Using a Custom Saver
+
+This method is used for complex data types that require custom serialization.
+
+```kotlin
+var user by rememberPreferenceStateOf(
+    defaultValue = User("", ""),
+    saver = UserPreferenceSaver
+)
+```
+
+- `saver: PreferenceSaver<T>?` → A custom saver for serializing and deserializing objects.
+- `defaultValue: T` → The default value to use when no data is found.
+- `sharedPreferences: SharedPreferences` → (Optional) A custom SharedPreferences instance.
+- `keys: Any` → (Optional) Additional keys to trigger recomposition.
 
 > 🚨 **Warning**  
 > You must provide either `key` or `saver`. If both are `null`, an exception will be thrown.
@@ -136,7 +153,6 @@ OutlinedTextField(
 - `rememberPreferenceStateOf(...)`: Uses `UserPreferenceSaver` to automatically store and retrieve `User` data in Compose.
 
 This approach allows you to persist and manage complex data types seamlessly within your Jetpack Compose application.
-
 
 ---
 
