@@ -11,26 +11,22 @@ import ir.amirreza.composepreferences.compositions.LocalSharedPreferences
 import ir.amirreza.composepreferences.saver.PreferenceSaver
 import ir.amirreza.composepreferences.utils.defaultPreferences
 
-
 /**
  * A custom MutableState that syncs with SharedPreferences.
  */
 @Stable
 class PreferenceMutableState<T>(
     private val sharedPreferences: SharedPreferences,
-    private val key: String,
+    private val key: String?,
     private val defaultValue: T,
     private val saver: PreferenceSaver<T>? = null
 ) : MutableState<T> {
 
-    private val _state = mutableStateOf(loadValue())
+    init {
+        require(!(key == null && saver == null)) { "At least one of 'key' or 'saver' must be non-null." }
+    }
 
-    override var value: T
-        get() = _state.value
-        set(newValue) {
-            _state.value = newValue
-            storeValue(newValue)
-        }
+    private val _state = mutableStateOf(loadValue())
 
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
@@ -43,8 +39,16 @@ class PreferenceMutableState<T>(
             }
         }
 
-    override fun component1() = value
-    override fun component2() = { newValue: T -> value = newValue }
+    override var value: T
+        get() = _state.value
+        set(newValue) {
+            _state.value = newValue
+            storeValue(newValue)
+        }
+
+    override fun component1(): T = value
+
+    override fun component2(): (T) -> Unit = { newValue: T -> value = newValue }
 
     @Suppress("UNCHECKED_CAST")
     private fun loadValue(): T = saver?.get(sharedPreferences) ?: run {
@@ -80,7 +84,6 @@ class PreferenceMutableState<T>(
 
     private fun Set<*>.filterString() = filterIsInstance<String>().toSet()
 
-
     fun registerListener() {
         sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
@@ -90,11 +93,14 @@ class PreferenceMutableState<T>(
     }
 }
 
+/**
+ * Creates a preference state that syncs with SharedPreferences.
+ */
 fun <T : Any> preferenceStateOf(
-    key: String,
+    key: String?,
     defaultValue: T,
     sharedPreferences: SharedPreferences,
-    saver: PreferenceSaver<T>? = null,
+    saver: PreferenceSaver<T>?,
 ) = PreferenceMutableState(
     key = key,
     defaultValue = defaultValue,
@@ -102,16 +108,40 @@ fun <T : Any> preferenceStateOf(
     saver = saver
 )
 
+/**
+ * Remembers a preference state that syncs with SharedPreferences using a key.
+ */
 @Composable
 fun <T : Any> rememberPreferenceStateOf(
     key: String,
     defaultValue: T,
     sharedPreferences: SharedPreferences = LocalSharedPreferences.current ?: defaultPreferences(),
-    saver: PreferenceSaver<T>? = null,
     vararg keys: Any
 ): MutableState<T> {
     return remember(*keys) {
-        preferenceStateOf(key, defaultValue, sharedPreferences, saver)
+        preferenceStateOf(key, defaultValue, sharedPreferences, null)
+    }.also { state ->
+        DisposableEffect(*keys) {
+            state.registerListener()
+            onDispose {
+                state.disposeListener()
+            }
+        }
+    }
+}
+
+/**
+ * Remembers a preference state that syncs with SharedPreferences using a custom saver.
+ */
+@Composable
+fun <T : Any> rememberPreferenceStateOf(
+    saver: PreferenceSaver<T>? = null,
+    defaultValue: T,
+    sharedPreferences: SharedPreferences = LocalSharedPreferences.current ?: defaultPreferences(),
+    vararg keys: Any
+): MutableState<T> {
+    return remember(*keys) {
+        preferenceStateOf(null, defaultValue, sharedPreferences, saver)
     }.also { state ->
         DisposableEffect(*keys) {
             state.registerListener()

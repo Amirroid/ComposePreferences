@@ -107,8 +107,7 @@ fun HomeScreen() {
 
             // ✅ Custom object preference (`User`)
             var user by rememberPreferenceStateOf(
-                "user",
-                User("", ""),
+                defaultValue = User("", ""),
                 saver = UserPreferenceSaver
             )
 

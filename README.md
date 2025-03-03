@@ -62,6 +62,9 @@ rememberPreferenceStateOf(
 - `saver: PreferenceSaver<T>?` → Custom saver for complex types (optional).
 - `keys: Any` → Additional keys to trigger recomposition when changed.
 
+> 🚨 **Warning**  
+> You must provide either `key` or `saver`. If both are `null`, an exception will be thrown.
+
 ### **Default Supported Types**
 If `saver` is **not provided**, the following types are supported:
 
@@ -108,8 +111,7 @@ object UserPreferenceSaver : PreferenceSaver<User> {
 
 ```kotlin
 var user by rememberPreferenceStateOf(
-    "user",
-    User("", ""),
+    defaultValue = User("", ""),
     saver = UserPreferenceSaver
 )
 
