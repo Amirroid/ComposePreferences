@@ -90,7 +90,7 @@ If `saver` is **not provided**, the following types are supported:
 - Boolean
 - Float
 - Long
-- Set<String>
+- Set\<String\>
 - Double
 
 ---
